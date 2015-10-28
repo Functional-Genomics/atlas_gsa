@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration experimentType="rnaseq_mrna_differential">
+	<analytics>
+		<assay_groups>
+			<assay_group id="g1" label="none">
+				<assay>SRR530897</assay>
+				<assay>SRR530896</assay>
+				<assay>SRR530895</assay>
+			</assay_group>
+			<assay_group id="g2" label="10 nanomolar; 6-formylindolo[3,2-b]carbazole (FICZ)">
+				<assay>SRR530900</assay>
+				<assay>SRR530899</assay>
+				<assay>SRR530898</assay>
+			</assay_group>
+			<assay_group id="g3" label="50 micromolar; tryptamine">
+				<assay>SRR530903</assay>
+				<assay>SRR530902</assay>
+				<assay>SRR530901</assay>
+			</assay_group>
+		</assay_groups>
+		<contrasts>
+			<contrast id="g1_g2">
+				<name>'6-formylindolo[3,2-b]carbazole (FICZ) 10' vs 'none'</name>
+				<reference_assay_group>g1</reference_assay_group>
+				<test_assay_group>g2</test_assay_group>
+			</contrast>
+			<contrast id="g1_g3">
+				<name>'tryptamine 50' vs 'none'</name>
+				<reference_assay_group>g1</reference_assay_group>
+				<test_assay_group>g3</test_assay_group>
+			</contrast>
+		</contrasts>
+	</analytics>
+</configuration>

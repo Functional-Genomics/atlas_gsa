@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration experimentType="microarray_1colour_mrna_differential">
+    <analytics>
+        <array_design>A-AFFY-27</array_design>
+        <assay_groups>
+            <assay_group id="g1" label="12 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 12 rep3</assay>
+                <assay>mut 12 rep1</assay>
+                <assay>mut 12 rep2</assay>
+            </assay_group>
+            <assay_group id="g2" label="30 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 30 rep2</assay>
+                <assay>mut 30 rep1</assay>
+                <assay>mut 30 rep3</assay>
+            </assay_group>
+            <assay_group id="g3" label="10 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 10 rep2</assay>
+                <assay>wt 10 rep3</assay>
+                <assay>wt 10 rep1</assay>
+            </assay_group>
+            <assay_group id="g4" label="15 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 15 rep2</assay>
+                <assay>mut 15 rep3</assay>
+                <assay>mut 15 rep1</assay>
+            </assay_group>
+            <assay_group id="g5" label="20 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 20 rep2</assay>
+                <assay>wt 20 rep3</assay>
+                <assay>wt 20 rep1</assay>
+            </assay_group>
+            <assay_group id="g6" label="12 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 12 rep3</assay>
+                <assay>wt 12 rep1</assay>
+                <assay>wt 12 rep2</assay>
+            </assay_group>
+            <assay_group id="g7" label="2 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 2 rep2</assay>
+                <assay>mut 2 rep1</assay>
+                <assay>mut 2 rep3</assay>
+            </assay_group>
+            <assay_group id="g8" label="40 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 40 rep2</assay>
+                <assay>mut 40 rep3</assay>
+                <assay>mut 40 rep1</assay>
+            </assay_group>
+            <assay_group id="g9" label="0 minute; wild type; control">
+                <assay>wt 0 rep2</assay>
+                <assay>wt 0 rep3</assay>
+                <assay>wt 0 rep1</assay>
+            </assay_group>
+            <assay_group id="g10" label="4 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 4 rep1</assay>
+                <assay>mut 4 rep2</assay>
+                <assay>mut 4 rep3</assay>
+            </assay_group>
+            <assay_group id="g11" label="60 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 60 rep3</assay>
+                <assay>mut 60 rep1</assay>
+                <assay>mut 60 rep2</assay>
+            </assay_group>
+            <assay_group id="g12" label="8 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 8 rep1</assay>
+                <assay>wt 8 rep2</assay>
+                <assay>wt 8 rep3</assay>
+            </assay_group>
+            <assay_group id="g13" label="35 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 35 rep1</assay>
+                <assay>wt 35 rep3</assay>
+                <assay>wt 35 rep2</assay>
+            </assay_group>
+            <assay_group id="g14" label="6 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 6 rep1</assay>
+                <assay>wt 6 rep2</assay>
+                <assay>wt 6 rep3</assay>
+            </assay_group>
+            <assay_group id="g15" label="0 minute; upf1 Delta; control">
+                <assay>mut 0 rep3</assay>
+                <assay>mut 0 rep1</assay>
+                <assay>mut 0 rep2</assay>
+            </assay_group>
+            <assay_group id="g16" label="2 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 2 rep1</assay>
+                <assay>wt 2 rep3</assay>
+                <assay>wt 2 rep2</assay>
+            </assay_group>
+            <assay_group id="g17" label="45 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 45 rep1</assay>
+                <assay>wt 45 rep2</assay>
+                <assay>wt 45 rep3</assay>
+            </assay_group>
+            <assay_group id="g18" label="35 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 35 rep2</assay>
+                <assay>mut 35 rep3</assay>
+                <assay>mut 35 rep1</assay>
+            </assay_group>
+            <assay_group id="g19" label="25 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 25 rep1</assay>
+                <assay>mut 25 rep3</assay>
+                <assay>mut 25 rep2</assay>
+            </assay_group>
+            <assay_group id="g20" label="25 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 25 rep3</assay>
+                <assay>wt 25 rep1</assay>
+                <assay>wt 25 rep2</assay>
+            </assay_group>
+            <assay_group id="g21" label="50 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 50 rep1</assay>
+                <assay>mut 50 rep3</assay>
+                <assay>mut 50 rep2</assay>
+            </assay_group>
+            <assay_group id="g22" label="30 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 30 rep2</assay>
+                <assay>wt 30 rep3</assay>
+                <assay>wt 30 rep1</assay>
+            </assay_group>
+            <assay_group id="g23" label="8 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 8 rep1</assay>
+                <assay>mut 8 rep3</assay>
+                <assay>mut 8 rep2</assay>
+            </assay_group>
+            <assay_group id="g24" label="40 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 40 rep1</assay>
+                <assay>wt 40 rep2</assay>
+                <assay>wt 40 rep3</assay>
+            </assay_group>
+            <assay_group id="g25" label="15 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 15 rep2</assay>
+                <assay>wt 15 rep1</assay>
+                <assay>wt 15 rep3</assay>
+            </assay_group>
+            <assay_group id="g26" label="4 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 4 rep2</assay>
+                <assay>wt 4 rep3</assay>
+                <assay>wt 4 rep1</assay>
+            </assay_group>
+            <assay_group id="g27" label="20 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 20 rep3</assay>
+                <assay>mut 20 rep2</assay>
+                <assay>mut 20 rep1</assay>
+            </assay_group>
+            <assay_group id="g28" label="60 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 60 rep3</assay>
+                <assay>wt 60 rep1</assay>
+                <assay>wt 60 rep2</assay>
+            </assay_group>
+            <assay_group id="g29" label="45 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 45 rep1</assay>
+                <assay>mut 45 rep3</assay>
+                <assay>mut 45 rep2</assay>
+            </assay_group>
+            <assay_group id="g30" label="10 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 10 rep3</assay>
+                <assay>mut 10 rep2</assay>
+                <assay>mut 10 rep1</assay>
+            </assay_group>
+            <assay_group id="g31" label="50 minute; wild type; thiolutin 10 microgram per milliliter">
+                <assay>wt 50 rep1</assay>
+                <assay>wt 50 rep2</assay>
+                <assay>wt 50 rep3</assay>
+            </assay_group>
+            <assay_group id="g32" label="6 minute; upf1 Delta; thiolutin 10 microgram per milliliter">
+                <assay>mut 6 rep2</assay>
+                <assay>mut 6 rep3</assay>
+                <assay>mut 6 rep1</assay>
+            </assay_group>
+        </assay_groups>
+        <contrasts>
+            <contrast id="g9_g15">
+                <name>'upf1 Delta' vs 'wild type' in 'control' at '0 minute'</name>
+                <reference_assay_group>g9</reference_assay_group>
+                <test_assay_group>g15</test_assay_group>
+            </contrast>
+            <contrast id="g16_g7">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '2 minute'</name>
+                <reference_assay_group>g16</reference_assay_group>
+                <test_assay_group>g7</test_assay_group>
+            </contrast>
+            <contrast id="g26_g10">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '4 minute'</name>
+                <reference_assay_group>g26</reference_assay_group>
+                <test_assay_group>g10</test_assay_group>
+            </contrast>
+            <contrast id="g14_g32">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '6 minute'</name>
+                <reference_assay_group>g14</reference_assay_group>
+                <test_assay_group>g32</test_assay_group>
+            </contrast>
+            <contrast id="g12_g23">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '8 minute'</name>
+                <reference_assay_group>g12</reference_assay_group>
+                <test_assay_group>g23</test_assay_group>
+            </contrast>
+            <contrast id="g3_g30">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '10 minute'</name>
+                <reference_assay_group>g3</reference_assay_group>
+                <test_assay_group>g30</test_assay_group>
+            </contrast>
+            <contrast id="g6_g1">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '12 minute'</name>
+                <reference_assay_group>g6</reference_assay_group>
+                <test_assay_group>g1</test_assay_group>
+            </contrast>
+            <contrast id="g25_g4">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '15 minute'</name>
+                <reference_assay_group>g25</reference_assay_group>
+                <test_assay_group>g4</test_assay_group>
+            </contrast>
+            <contrast id="g5_g27">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '20 minute'</name>
+                <reference_assay_group>g5</reference_assay_group>
+                <test_assay_group>g27</test_assay_group>
+            </contrast>
+            <contrast id="g20_g19">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '25 minute'</name>
+                <reference_assay_group>g20</reference_assay_group>
+                <test_assay_group>g19</test_assay_group>
+            </contrast>
+            <contrast id="g22_g2">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '30 minute'</name>
+                <reference_assay_group>g22</reference_assay_group>
+                <test_assay_group>g2</test_assay_group>
+            </contrast>
+            <contrast id="g13_g18">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '35 minute'</name>
+                <reference_assay_group>g13</reference_assay_group>
+                <test_assay_group>g18</test_assay_group>
+            </contrast>
+            <contrast id="g24_g8">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '40 minute'</name>
+                <reference_assay_group>g24</reference_assay_group>
+                <test_assay_group>g8</test_assay_group>
+            </contrast>
+            <contrast id="g17_g29">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '45 minute'</name>
+                <reference_assay_group>g17</reference_assay_group>
+                <test_assay_group>g29</test_assay_group>
+            </contrast>
+            <contrast id="g31_g21">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '50 minute'</name>
+                <reference_assay_group>g31</reference_assay_group>
+                <test_assay_group>g21</test_assay_group>
+            </contrast>
+            <contrast id="g28_g11">
+                <name>'upf1 Delta' vs 'wild type' in 'thiolutin 10 microgram per milliliter' at '60 minute'</name>
+                <reference_assay_group>g28</reference_assay_group>
+                <test_assay_group>g11</test_assay_group>
+            </contrast>
+        </contrasts>
+    </analytics>
+</configuration>
