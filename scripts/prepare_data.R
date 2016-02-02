@@ -146,12 +146,14 @@ if ( length(xml.files) != length(tsv.files) ) {
 ################################
 # data
 pvals <- c(0.001,0.01,0.05,0.1)
-
+gene.name.col <- 1
 # number of significant genes and non-significant genes
+nSigGenes <- list()
 sigGenes <- list()
-notSigGenes <- list()
 # Total number of genes considered in an experiment:::contrast
 exp2ngenes <- list()
+# Set of genes considered on each experiment
+expgenes <- list()
 
 for ( i in seq(1,length(tsv.files))) {
   cat(i,"\n")
@@ -160,46 +162,55 @@ for ( i in seq(1,length(tsv.files))) {
   pinfo("File ",tsv.files[i]," loaded.")
   # Each file may contain different comparisons
   colsOfInterest <- grep("p-value",colnames(tsv.df),value=T)
-  pinfo("Found ",length(colsOfInterest)," comparisons")
+  pinfo("Found ",length(colsOfInterest)," comparisons by looking at p-value columns")
+  exp <- gsub("-analytics.*","",basename(tsv.files[[i]]))
   for ( df.col in colsOfInterest) {
     cont <- gsub(".p-value","",df.col)
     ## TODO: replace tsv.file by the name/accession of the experiment
-    ## TODO: how to deal with the NAs??
-    key=paste(basename(tsv.files[[i]]),":::",cont,sep="")
+    ## TODO: how to deal with the NAs?? -> pvalue=1
+    
+    key=paste(exp,":::",cont,sep="")
     pinfo("Contrast: ", cont)
     pinfo("key: ", key)
     # create a matrix for each contrast
-    sigGenes[[key]] <- rep(NA,length(pvals))
-    names(sigGenes[[key]]) <- as.character(pvals)
-    notSigGenes[[key]] <- rep(NA,length(pvals))
-    names(notSigGenes[[key]]) <- as.character(pvals)
+    sigGenes[[key]] <- list()
+    nSigGenes[[key]] <- rep(NA,length(pvals))
+    names(nSigGenes[[key]]) <- as.character(pvals)
 
     exp2ngenes[[key]] <- nrow(tsv.df)
+    expgenes[[key]] <- as.character(tsv.df[,gene.name.col])
     pinfo("Number of genes: ",exp2ngenes[[key]])
-    print(as.character(pvals))
-    print(notSigGenes[[key]])
+    cat("PVALS:",as.character(pvals))
     print(sigGenes[[key]])
-    for (pval in pvals) {
+    for (pval in sort(pvals)) {
+      # TODO: optimize memory usage
       pinfo("pval:",pval)
       pinfo(df.col)
-      sg <- sum(tsv.df[,df.col]<=pval,na.rm=TRUE)
-      nsigGenes <- exp2ngenes[[key]]-sg
-      pinfo("sigGenes: ",sigGenes)
+      #sg <- sum(tsv.df[,df.col]<=pval,na.rm=TRUE)
+      sg <- tsv.df[tsv.df[,df.col]<=pval,gene.name.col]
+      # exclude NA
+      sg <- as.character(sg[!is.na(sg)])
+      nsigGenes <- length(sg)
+      pinfo("sigGenes: ",sg)
       #save.image("test.Rdata")
       #load("test.Rdata")
-      pinfo("not sigGenes: ",nsigGenes)
+      pinfo("nsigGenes: ",nsigGenes)
       pinfo(names(sigGenes[[key]]))
-      sigGenes[[key]][as.character(pval)] <- sg
+      sigGenes[[key]][[as.character(pval)]] <- sg
       pinfo(".")
-      notSigGenes[[key]][as.character(pval)] <- nsigGenes
+      nSigGenes[[key]][as.character(pval)] <- nsigGenes
       pinfo(".")
     }
+    names(sigGenes[[key]]) <- as.character(pvals)    
     pinfo(".")
   }
 }
-save(notSigGenes,sigGenes,nsigGenes,file=opt$out.file)
+
+print(sigGenes)
+print(exp2ngenes)
+save(nSigGenes,sigGenes,exp2ngenes,expgenes,file=opt$out.file)
 # Make a few plots
 # Distribution of the number of genes per experiment
-# 
+#
 pinfo("That's all folks!")
 q(status=0)
