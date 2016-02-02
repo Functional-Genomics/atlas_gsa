@@ -154,7 +154,7 @@ numberOfContrastsConsidered <- 0
 expRes <- list()
 #
 # go through each exp/contrast
-compute.stats <- function(exp) {
+compute.stats <- function(exp,genes,pval) {
   pinfo(exp)
   genes2consider <- genes[genes %in% expgenes[[exp]]]
   if ( length(genes2consider) == 0  ) {
@@ -176,16 +176,22 @@ compute.stats <- function(exp) {
                byrow=T,
                nrow=2)
   #print(go)
-                                        
+  
   ft <- fisher.test(go,alternative="greater")
+  gidx <- ""
+  # be lazy...only keep the list of genes for the cases that
+  # we really may need them
+  if ( ft$p.value <= pval ) {    
+    gidx <- paste(which(genes %in% overlap,arr.ind=TRUE),collapse=",")
+  }
   #res <- list(Exp=exp,pval=ft$p.value,expected=n.overlap,observed=ngenes*nSigGenes[[exp]][[as.character(opt$pvalue)]]/exp2ngenes[[exp]])
-  res <- data.frame(exp,ft$p.value,n.overlap,ngenes*nSigGenes[[exp]][[as.character(opt$pvalue)]]/exp2ngenes[[exp]])
-  colnames(res) <- c("exp","pval","observed","expected")
+  res <- data.frame(exp,ft$p.value,n.overlap,ngenes*nSigGenes[[exp]][[as.character(opt$pvalue)]]/exp2ngenes[[exp]],gidx)  
+  colnames(res) <- c("exp","pval","observed","expected","genes")
   return(res)
 }
                                         #}
 pinfo("Preparing summary table")
-expRes <- mclapply(names(expgenes),compute.stats,mc.allow.recursive = FALSE)
+expRes <- mclapply(names(expgenes),compute.stats,genes=genes,pval=opt$pvalue,mc.allow.recursive = FALSE)
 #expRes <- lapply(names(expgenes),compute.stats)
 
 #remove NULLs
