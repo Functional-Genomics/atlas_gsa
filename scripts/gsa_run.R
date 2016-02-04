@@ -56,27 +56,6 @@ myParseArgs <- function(usage,option_list,filenames.exist=NULL,multiple.options=
 }
 
 
-readList <- function(filename) {
-  df <- NULL
-  df <- tryCatch(read.table(filename,header=F,colClasses=c("character")),error=function(x) NULL)
-  if ( is.null(df) ) {
-    stop("Error loading ",filename)
-  }
-  return(df$V1)
-}
-
-load.tsv <- function(filename) {
-
-  df <- NULL
-  df <- tryCatch(read.table(filename,header=T,sep="\t",check.names=F,comment.char="",quote=""))
-  if ( is.null(df) ) {
-    perror("Error loading ",filename)
-    quit(status=1)
-  }
-  return(df)
-}
-
-
 ############################################################
 # Useful functions
 pinfo <- function(...) {
@@ -91,14 +70,114 @@ perror <- function(...) {
   cat("[ERROR] ",...,"\n",file=stderr())
 }
 
+###############################################################
+#
+# Assumptions: expgenes, sigGenes, expngenes,nSigGenes exist
+compute.stats <- function(exp,genes,pval,fdr,verbose=FALSE) {
+  #
+  pval.chr <- as.character(pval)
+  genes2consider <- genes[genes %in% expgenes[[exp]]]
+  if ( length(genes2consider) == 0  ) {
+    pwarning("No overlap between the provided gene list and ",exp)
+    return(NULL)
+  } 
+  ngenes <- length(genes2consider)
+  overlap <- genes2consider[genes2consider %in% sigGenes[[exp]][[pval.chr]]]
+  n.overlap <- length(overlap)
+  if ( verbose ) {
+    pinfo(exp)
+    pinfo("|Genes to consider|:",ngenes)
+    pinfo("|Genes DE|:",nSigGenes[[exp]][[pval.chr]])
+                                        #pinfo("Genes DE:",sigGenes[[exp]][[as.character(opt$pvalue)]])
+                                        #pinfo("GS:",genes2consider)
+    pinfo("|DE and GS|:",n.overlap)
+    pinfo("|genes|:",exp2ngenes[[exp]])
+  }
+                                        # DE&GS; DE&not GS; not DE & GS ; not DE & not GS
+  go <- matrix(c(n.overlap,nSigGenes[[exp]][[pval.chr]]-n.overlap,
+                 ngenes-n.overlap,exp2ngenes[[exp]]-nSigGenes[[exp]][[pval.chr]]-ngenes+n.overlap),
+               byrow=T,
+               nrow=2)
+  #print(go)
+  
+  ft <- fisher.test(go,alternative="greater")
+  gidx <- ""
+  # be lazy...only keep the list of genes for the cases that
+  # we really may need them
+  if ( ft$p.value <= fdr ) {    
+    gidx <- paste(which(genes %in% overlap,arr.ind=TRUE),collapse=",")
+  }
+  res <- data.frame(exp,ft$p.value,n.overlap,ngenes*nSigGenes[[exp]][[pval.chr]]/exp2ngenes[[exp]],gidx)  
+  colnames(res) <- c("exp","pval","observed","expected","genes")
+  return(res)
+}
+
+
+server.mode <- function(){
+
+  while(TRUE){
+    writeLines("Listening...")
+    con <- socketConnection(host="localhost", port = 9999, blocking=TRUE,
+                            server=TRUE, open="r+")
+    on.exit(close.socket(con))
+    data <- readLines(con, 1)
+    # first word - species
+    # second word fdr
+    # 3rd word pvalue
+    # remaining words - genes
+    print(data)
+    l <- strsplit(data,split="[ \t,;]+")[[1]]
+    print(l)
+    species <- l[1]
+    opt$fdr <- as.numeric(l[2])
+    opt$pvalue <- as.numeric(l[3])
+    genes <- l[-c(1,2,3)]
+
+    # uggly code ... duplicated!
+    expRes <- list()
+    pinfo("Performing tests...")
+    expRes <- mclapply(names(expgenes),compute.stats,genes=genes,pval=opt$pvalue,fdr=opt$fdr,verbose=opt$verbose,mc.allow.recursive = FALSE)
+#expRes <- lapply(names(expgenes),compute.stats)
+    pinfo("Performing tests...done.")
+#remove NULLs
+#expRes <- expRes[!sapply(expRes,is.null)]
+    pinfo("Preparing summary table...")
+    final.table <- do.call(rbind.data.frame, expRes)
+    final.table$expected <- round(final.table$expected,2)
+    final.table$adj.pvalue  <- p.adjust(final.table$pval,method="BH")
+    final.table$effect.size <- round(final.table$observed/final.table$expected,2)
+
+# Table complete... 
+    pinfo("Table with ",nrow(final.table)," contrasts")
+    final.table <- final.table[final.table$adj.pvalue<=opt$fdr,]
+    pinfo("Final table with ",nrow(final.table)," significant contrasts where fdr=",opt$fdr)
+
+# return with an exit status of 3 if no overlap is found
+    if ( nrow(final.table) ==0 ) {
+      writeLines("0", con) 
+    } else {
+
+# order by effect size and adj.pvalue
+      final.table <- final.table[order(-1*final.table$effect.size,final.table$adj.pvalue,decreasing=F),]
+
+# write to a file
+      write.table(final.table,file=con,sep="\t",quote=F,row.names=F)
+    }
+    close(con)
+  }
+}
+
 ###############################################################################
 usage <- "gsa_run.R --db db.po --gs 'gene1 gene2 ...'  [--pvalue 0.01] --out prefix [-c cores]"
 # note: the number of genes should be smaller than ~800 (shell constraints)
 option_list <- list(
   make_option(c("-c", "--cores"), type="character",default="2",dest="num_cores",help="Number of cores to use ([default %default])"),
   make_option(c("-p", "--pvalue"), type="numeric",default=0.01,dest="pvalue",help="Pvalue threshold ([default %default])."),
+  make_option(c("-f", "--fdr"), type="numeric",default=0.01,dest="fdr",help="FDR ([default %default])."),
   make_option(c("-d", "--db"), type="character", dest="db.file", default=NULL,help="Path to a file created with prepare_data.R."),
   make_option(c("-g", "--gs"), type="character",default=NULL,dest="gs",help="Set of genes."),
+  make_option(c("-v", "--verbose"), ,action="store_true",default=FALSE,dest="verbose",help="Increase verbosity."),
+  make_option(c("-s", "--server"), ,action="store_true",default=FALSE,dest="server_mode",help="Server mode (listen in port 9999)."),
   make_option(c("-o", "--out"), type="character",default=NULL,dest="out.file",help="Output file name prefix.")
 )
 multiple.options <- NULL
@@ -131,83 +210,69 @@ if ( num.cores>detectCores()) {
 options(mc.cores=num.cores)
 
 ###############################################################
-pinfo("ready to go")
-
-# TODO: move to a shared file
-pvals <- c(0.001,0.01,0.05,0.1)
-if ( sum(opt$pvalue %in% pvals)!=1 ) {
-  perror("Invalid pvalue ",opt$pvalue)
-  q(status=1)
-}
 
 pinfo("p-value=",opt$pvalue)
 genes <- strsplit(opt$gs,split="[ \t;,]+")[[1]]
 pinfo("|Set of genes provided|=",length(genes))
 
 pinfo("Loading ",opt$db,"...")
-load(opt$db)
+load(opt$db,verbose=T)
 pinfo("Loading ",opt$db,"...done.")
 
 pinfo("Number of contrasts: ",length(exp2ngenes))
+# TODO: check if all variables are present?
 
-numberOfContrastsConsidered <- 0
-expRes <- list()
-#
-# go through each exp/contrast
-compute.stats <- function(exp,genes,pval) {
-  pinfo(exp)
-  genes2consider <- genes[genes %in% expgenes[[exp]]]
-  if ( length(genes2consider) == 0  ) {
-    pwarning("No overlap between the provided gene list and ",exp)
-    return(NULL)
-  } 
-  ngenes <- length(genes2consider)
-  overlap <- genes2consider[genes2consider %in% sigGenes[[exp]][[as.character(opt$pvalue)]]]
-  n.overlap <- length(overlap)
-  pinfo("|Genes to consider|:",ngenes)
-  pinfo("|Genes DE|:",nSigGenes[[exp]][[as.character(opt$pvalue)]])
-                                        #pinfo("Genes DE:",sigGenes[[exp]][[as.character(opt$pvalue)]])
-                                        #pinfo("GS:",genes2consider)
-  pinfo("|DE and GS|:",n.overlap)
-  pinfo("|genes|:",exp2ngenes[[exp]])
-                                        # DE&GS; DE&not GS; not DE & GS ; not DE & not GS
-  go <- matrix(c(n.overlap,nSigGenes[[exp]][[as.character(opt$pvalue)]]-n.overlap,
-                 ngenes-n.overlap,exp2ngenes[[exp]]-nSigGenes[[exp]][[as.character(opt$pvalue)]]-ngenes+n.overlap),
-               byrow=T,
-               nrow=2)
-  #print(go)
-  
-  ft <- fisher.test(go,alternative="greater")
-  gidx <- ""
-  # be lazy...only keep the list of genes for the cases that
-  # we really may need them
-  if ( ft$p.value <= pval ) {    
-    gidx <- paste(which(genes %in% overlap,arr.ind=TRUE),collapse=",")
-  }
-  #res <- list(Exp=exp,pval=ft$p.value,expected=n.overlap,observed=ngenes*nSigGenes[[exp]][[as.character(opt$pvalue)]]/exp2ngenes[[exp]])
-  res <- data.frame(exp,ft$p.value,n.overlap,ngenes*nSigGenes[[exp]][[as.character(opt$pvalue)]]/exp2ngenes[[exp]],gidx)  
-  colnames(res) <- c("exp","pval","observed","expected","genes")
-  return(res)
+# Number of possible pvals defined when preprocessing the data
+#pvals <- c(0.001,0.01,0.05,0.1)
+if ( sum(opt$pvalue %in% pvals)!=1 ) {
+  perror("Invalid pvalue ",opt$pvalue)
+  q(status=1)
 }
-                                        #}
-pinfo("Preparing summary table")
-expRes <- mclapply(names(expgenes),compute.stats,genes=genes,pval=opt$pvalue,mc.allow.recursive = FALSE)
-#expRes <- lapply(names(expgenes),compute.stats)
+pinfo("ready to go!")
 
+if ( opt$server ) {
+  server.mode()
+}
+####################################################################
+expRes <- list()
+pinfo("Performing tests...")
+expRes <- mclapply(names(expgenes),compute.stats,genes=genes,pval=opt$pvalue,fdr=opt$fdr,verbose=opt$verbose,mc.allow.recursive = FALSE)
+#expRes <- lapply(names(expgenes),compute.stats)
+pinfo("Performing tests...done.")
 #remove NULLs
 #expRes <- expRes[!sapply(expRes,is.null)]
-
+pinfo("Preparing summary table...")
 final.table <- do.call(rbind.data.frame, expRes)
 final.table$expected <- round(final.table$expected,2)
 final.table$adj.pvalue  <- p.adjust(final.table$pval,method="BH")
 final.table$effect.size <- round(final.table$observed/final.table$expected,2)
 
-# 
+# Table complete... 
 pinfo("Table with ",nrow(final.table)," contrasts")
-final.table <- final.table[final.table$adj.pvalue<=opt$pvalue,]
-pinfo("Final table with ",nrow(final.table)," significant contrasts")
+final.table <- final.table[final.table$adj.pvalue<=opt$fdr,]
+pinfo("Final table with ",nrow(final.table)," significant contrasts where fdr=",opt$fdr)
+
+# return with an exit status of 3 if no overlap is found
+if ( nrow(final.table) ==0 ) {
+  cat("No experiments found.\n")
+  q(status=3)
+}
+
+# order by effect size and adj.pvalue
 final.table <- final.table[order(-1*final.table$effect.size,final.table$adj.pvalue,decreasing=F),]
-write.table(final.table,file=paste(opt$out,".tsv",sep=""),sep="\t",quote=F,row.names=F)
+
+# write to a file
+write.table(final.table,file=paste(opt$out.file,".tsv",sep=""),sep="\t",quote=F,row.names=F)
+
+q(status=0)
+# not implemented
+# make a plot
+if ( nrow(final.table) > 1 ) {
+  png(file=paste(opt$out.file,".png",sep="")width=550,height=550,res=150)
+  dev.off()      
+} else {
+  pwarning("Insufficient experiments to make a plot")
+}
 q(status=0)
 
 
