@@ -17,10 +17,14 @@
 #
 #
 # =========================================================
+# Install the R package
+source("http://bioconductor.org/biocLite.R")
+if (!require(devtools)) {
+  biocLite("devtools")
+}
+library(devtools)
+#install_github("Functional-Genomics/atlas_gsa/")
 
-# Install all packages required
-repo<-"http://www.stats.bris.ac.uk/R/"
-install.packages("optparse",repos=repo)
-install.packages("parallel",repos=repo)
-
-q(status=0)
+biocLite("parallel")
+biocLite("bit")
+biocLite("optparse")
