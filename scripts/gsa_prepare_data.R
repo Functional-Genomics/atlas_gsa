@@ -18,82 +18,15 @@
 #
 # =========================================================
 
+initial.options <- commandArgs(trailingOnly = FALSE)
+script.dir <- dirname(sub("--file=", "", initial.options[grep("--file", initial.options)]))
+source(paste(script.dir,"/../R/atlasGSA.R",sep=""))
+
+#library(atlasGSA)
+
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("parallel"))
 
-myParseArgs <- function(usage,option_list,filenames.exist=NULL,multiple.options=NULL,mandatory=NULL,...) {
-
-  # get command line options, if help option encountered print help and exit,
-  # otherwise if options not found on command line then set defaults,
-  parser <- OptionParser(usage = usage, option_list=option_list)
-  opt <- parse_args(parser,...)
-  
-  for ( m in mandatory ) {
-    if ( is.null(opt[[m]]) ) {
-        perror("Parameter ",m," needs to be defined")
-        quit(status=1)
-    }
-  }
-  
-  for ( p in filenames.exist ) {
-    if (! is.null(opt[[p]]) ) {
-      if (! file.exists(opt[[p]]) ) {
-        perror("File ",opt[[p]]," not found")
-        quit(status=1)
-      }
-    }
-  }
-
-  for ( op in names(multiple.options) ) {
-    if ( ! opt[[op]] %in% multiple.options[[op]] ) {
-      perror("Invalid value ",opt[[op]]," for option ",op)
-      quit(status=1)
-    }
-  }
-  return(opt)
-}
-
-
-readList <- function(filename) {
-  df <- NULL
-  df <- tryCatch(read.table(filename,header=F,colClasses=c("character")),error=function(x) NULL)
-  if ( is.null(df) ) {
-    stop("Error loading ",filename)
-  }
-  return(df$V1)
-}
-
-load.tsv <- function(filename) {
-
-  df <- NULL
-  df <- tryCatch(read.table(filename,header=T,sep="\t",check.names=F,comment.char="",quote=""))
-  if ( is.null(df) ) {
-    perror("Error loading ",filename)
-    quit(status=1)
-  }
-  return(df)
-}
-
-
-############################################################
-# Useful functions
-pinfo <- function(...) {
-  cat(paste("[INFO] ",...,"\n",sep=""))
-}
-
-pwarning <- function(...) {
-  cat("[WARNING] ",...,"\n",file=stderr())
-}
-
-perror <- function(...) {
-  cat("[ERROR] ",...,"\n",file=stderr())
-}
-
-debug <- FALSE
-pdebug <- function(...) {
-  if (debug) 
-    cat("[ERROR] ",...,"\n",file=stderr())
-}
 ###############################################################################
 usage <- "prepare_data.R --tsv-list file --xml-list file --out prefix"
 option_list <- list(
@@ -186,7 +119,8 @@ for ( i in seq(1,nfiles)) {
     names(nSigGenes[[key]]) <- as.character(pvals)
 
     exp2ngenes[[key]] <- nrow(tsv.df)
-    expgenes[[key]] <- as.character(tsv.df[,gene.name.col])
+    # some exps (MA) have the same gene multiple times E-GEOD-3076_A-AFFY-27:::g13_g18
+    expgenes[[key]] <- unique(as.character(tsv.df[,gene.name.col]))
     pinfo("Number of genes: ",exp2ngenes[[key]])
     #cat("PVALS:",as.character(pvals))
     #print(sigGenes[[key]])
@@ -197,7 +131,7 @@ for ( i in seq(1,nfiles)) {
       #sg <- sum(tsv.df[,df.col]<=pval,na.rm=TRUE)
       sg <- tsv.df[tsv.df[,df.col]<=pval,gene.name.col]
       # exclude NA
-      sg <- as.character(sg[!is.na(sg)])
+      sg <- unique(as.character(sg[!is.na(sg)]))
       nsigGenes <- length(sg)
       pdebug("sigGenes: ",sg)
       #save.image("test.Rdata")
@@ -219,20 +153,48 @@ save(pvals,nSigGenes,sigGenes,exp2ngenes,expgenes,file=opt$out.file)
 # Make a few plots
 # Distribution of the number of genes per experiment
 #
+
+#############################################
+# optimization attempt
+# install.packages(bit)
+library(bit)
+
+gene.list2bit <- function(genes,ref.genes) {  
+  tf <- ref.genes %in% genes
+  return(as.bit(tf))
+}
+# how many and which genes do we have?
+genes <- c()
+for ( n in names(expgenes) ) {
+  if ( !is.null(expgenes[[n]]) ) {
+    genes <- unique(append(genes,expgenes[[n]]))
+  }
+}
+#genes <- sort(unique(unlist(expgenes)))
+pinfo("#genes:",length(genes))
+
+exp.index <- list()
+# all genes for a given species
+exp.index$genes <- genes
+# number of genes
+exp.index$ngenes <- length(genes)
+# number of genes per contrast
+exp.index$exp2ngenes <- exp2ngenes
+# set of genes in each contrast
+exp.index$expgenes <- lapply(expgenes,gene.list2bit,ref.genes=exp.index$genes)
+# p-values considered
+exp.index$pvals <- pvals
+# number of significant genes per contrast/pvalue
+exp.index$nSigGenes <- nSigGenes
+# set of sig. genes per contrast/pvalue
+exp.index$sigGenes <- list()
+for ( c in names(sigGenes) ) {
+  exp.index$sigGenes[[c]] <- list()
+  for ( p in names(sigGenes[[c]])) {
+    exp.index$sigGenes[[c]][[p]] <- gene.list2bit(sigGenes[[c]][[p]],ref.genes=exp.index$genes)
+  }
+}
+pinfo("Saving to file (v2)",paste("v2_",opt$out.file,sep=""))
+save(exp.index,file=paste("v2_",opt$out.file,sep=""))
 pinfo("That's all folks!")
 q(status=0)
-
-install.packages("XML")
-library(XML)
-x<-xmlToDataFrame("test_1/E-GEOD-3076-configuration.xml")
-x
-doc <- xmlTreeParse("test_1/E-GEOD-3076-configuration.xml", useInternalNodes = TRUE)
-doc
-dd = getNodeSet(doc, "//contrasts")
-dd
-xmlToDataFrame(dd)
-xmlToDataFrame(nodes=dd,homogeneous=T)
-help(xmlToDataFrame)
-doc2 <- xmlTreeParse("test_1/E-GEOD-3076-configuration.xml")
-doc2$doc$children$configuration
-sapply(dd, xmlGetAttr, "id")
