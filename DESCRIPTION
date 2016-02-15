@@ -1,0 +1,15 @@
+Package: atlasGSA
+Title: Expression Atlas Gene Set Overlap
+Version: 0.1
+Authors@R: person("Nuno", "Fonseca", email = "firstname.lastname@gmail.com",
+                  role = c("aut", "cre"))
+Description: Perform gene set overlap analysis against a (large) set of processed experiments.
+URL: https://github.com/Functional-Genomics/atlas_gsa
+BugReports: https://github.com/Functional-Genomics/atlas_gsa/issues
+Depends: R (>= 3.1.0)
+License: GPL-3
+LazyData: true
+Imports:
+	optparse (>=1.3),
+	parallel,
+	bit (>=1.0)
