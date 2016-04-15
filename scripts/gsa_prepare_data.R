@@ -28,11 +28,11 @@ suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("parallel"))
 
 ###############################################################################
-usage <- "prepare_data.R --tsv-list file --xml-list file --out prefix"
+usage <- "prepare_data.R --tsv-list file  --out prefix"
 option_list <- list(
   make_option(c("-c", "--cores"), type="character",default="2",dest="num_cores",help="Number of cores to use ([default %default])"),
   make_option(c("-i", "--tsv-list"), type="character", dest="tsv.list.file", default=NULL,help="File with the list of TSV file names  (gene ids should appear in the first column)"),
-  make_option(c("-x", "--xml-list"), type="character", dest="xml.list.file", default=NULL,help="File with the list of XML configuration file names."),
+  make_option(c("-x", "--xml-list"), type="character", dest="xml.list.file", default=NULL,help="File with the list of XML configuration file names (deprecated)."),
   make_option(c("-o", "--out"), type="character",default=NULL,dest="out.file",help="Output file name prefix."),
   make_option(c("-d", "--debug"), ,action="store_true",default=FALSE,dest="debug",help="Enable debug mode (much more verbose).")
 )
@@ -41,6 +41,7 @@ filenames <- c("tsv.list.file","xml.list.file") ;#filenames that must exist (if 
 
 # check multiple options values
 mandatory <- c("tsv.list.file","xml.list.file","out.file")
+mandatory <- c("tsv.list.file","out.file")
 opt <- myParseArgs(usage = usage, option_list=option_list,filenames.exist=filenames,multiple.options=multiple.options,mandatory=mandatory)
 
 debug <- opt$debug
@@ -71,15 +72,19 @@ options(mc.cores=num.cores)
 pinfo("Reading the list of tsv file names",opt$tsv.list.file)
 tsv.files <- readList(opt$tsv.list.file)
 pinfo("Number of TSV files to process: ",length(tsv.files))
-pinfo("Reading teh configuration file names",opt$xml.list.file)
-xml.files <- readList(opt$xml.list.file)
-pinfo("Number of XML files to process: ",length(xml.files))
-
-# Sanity check
-if ( length(xml.files) != length(tsv.files) ) {
-  perror("Number of xml files (",length(xml.files),") is different from the number of tsv files (",length(tsv.files),")")
-  quit(status=1)
+if ( ! is.null(opt$xml.list.file) ) {
+  pinfo("Reading the configuration file names",opt$xml.list.file)
+  xml.files <- readList(opt$xml.list.file)
+  pinfo("Number of XML files to process: ",length(xml.files))
 }
+
+#if ( ! is.null(opt$xml.list.file) ) {
+# Sanity check
+#  if ( length(xml.files) != length(tsv.files) ) {
+#    perror("Number of xml files (",length(xml.files),") is different from the number of tsv files (",length(tsv.files),")")
+#    quit(status=1)
+#  }
+#}
 
 # TODO: check for duplicated files
 ################################
