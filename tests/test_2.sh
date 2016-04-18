@@ -12,7 +12,7 @@ sed "s/-analytics.tsv.gz/-configuration.xml/" tsv_files_2 > xml_files_2
 # collect and summarise the data
 echo "Indexing..."
 if [ ! -e v2_$species.po ]; then
-    run_wrapper "$species\tIndex\t." $logfile ../scripts/gsa_prepare_dataV2.R -c 4 -i tsv_files_2  -x xml_files_2 -o $species.po
+    run_wrapper "$species\tIndex\t." $logfile ../scripts/gsa_prepare_dataV2.R -c 4 -i tsv_files_2 -o $species.po
     # ~15m to index
     echo "Indexing...done."
 else
