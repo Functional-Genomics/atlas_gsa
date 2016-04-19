@@ -8,15 +8,15 @@ rm -f $logfile
 
 # Collect all analytics from one folder
 ls -1 test2/*-analytics.tsv.gz > tsv_files_2
-sed "s/-analytics.tsv.gz/-configuration.xml/" tsv_files_2 > xml_files_2
+#sed "s/-analytics.tsv.gz/-configuration.xml/" tsv_files_2 > xml_files_2
 # collect and summarise the data
 echo "Indexing..."
-if [ ! -e v2_$species.po ]; then
-    run_wrapper "$species\tIndex\t." $logfile ../scripts/gsa_prepare_dataV2.R -c 4 -i tsv_files_2 -o $species.po
+if [ ! -e $species.po ]; then
+    run_wrapper "$species\tIndex\t." $logfile ../scripts/gsa_prepare_data.R -c 4 -i tsv_files_2 -o $species.po
     # ~15m to index
     echo "Indexing...done."
 else
-    echo "Found v2_human.po file...skipping indexing"
+    echo "Found $species.po file...skipping indexing"
 fi
 
 
@@ -31,7 +31,7 @@ gset100="ENSG00000260837 ENSG00000260852 ENSG00000260862 ENSG00000260907 ENSG000
 
 for gs in gset0 gset5 gset10 gset100; do
     echo -n $gs
-    run_wrapper "$species\t$gs\tv2" $logfile ../scripts/gsa_run_v2.R --db v2_human.po --out res_v2_$gs.tsv --gs "'${!gs}'"
+#    run_wrapper "$species\t$gs\tv2" $logfile ../scripts/gsa_run_v2.R --db v2_human.po --out res_v2_$gs.tsv --gs "'${!gs}'"
     run_wrapper "$species\t$gs\tv1" $logfile ../scripts/gsa_run.R --db human.po --out res_$gs.tsv --gs "'${!gs}'"
 done
 
