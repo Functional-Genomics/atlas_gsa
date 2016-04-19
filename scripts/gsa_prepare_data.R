@@ -153,8 +153,8 @@ for ( i in seq(1,nfiles)) {
 
 #print(sigGenes)
 #print(exp2ngenes)
-pinfo("Saving to file ",opt$out.file)
-save(pvals,nSigGenes,sigGenes,exp2ngenes,expgenes,file=opt$out.file)
+#pinfo("Saving to file ",opt$out.file)
+#save(pvals,nSigGenes,sigGenes,exp2ngenes,expgenes,file=opt$out.file)
 # Make a few plots
 # Distribution of the number of genes per experiment
 #
@@ -199,7 +199,7 @@ for ( c in names(sigGenes) ) {
     exp.index$sigGenes[[c]][[p]] <- gene.list2bit(sigGenes[[c]][[p]],ref.genes=exp.index$genes)
   }
 }
-pinfo("Saving to file (v2)",paste("v2_",opt$out.file,sep=""))
-save(exp.index,file=paste("v2_",opt$out.file,sep=""))
+pinfo("Saving index to file ",paste(opt$out.file,sep=""))
+save(exp.index,file=paste(opt$out.file,sep=""))
 pinfo("That's all folks!")
 q(status=0)

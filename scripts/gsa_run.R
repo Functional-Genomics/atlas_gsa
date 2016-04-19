@@ -18,15 +18,13 @@
 #
 #
 # =========================================================
-
 initial.options <- commandArgs(trailingOnly = FALSE)
 script.dir <- dirname(sub("--file=", "", initial.options[grep("--file", initial.options)]))
 source(paste(script.dir,"/../R/atlasGSA.R",sep=""))
 
-#library(atlasGSA)
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("parallel"))
-
+suppressPackageStartupMessages(library("bit"))
 
 
 ###############################################################################
@@ -80,51 +78,42 @@ pinfo("|Set of unique genes provided|=",length(unique(genes)))
 genes <- unique(genes)
 
 pinfo("Loading ",opt$db,"...")
-load(opt$db,verbose=T)
+system.time(load(opt$db,verbose=T))
 pinfo("Loading ",opt$db,"...done.")
 
-pinfo("Number of contrasts: ",length(exp2ngenes))
+# check if the DS are in the file
+if ( !exists("exp.index") ) {
+  cat("ERROR: Corrupted or wrong db file ",opt$db,"\n")
+  q(status=1)
+}
+
+pinfo("Number of contrasts: ",length(exp.index$exp2ngenes))
 # TODO: check if all variables are present?
 
 # Number of possible pvals defined when preprocessing the data
 #pvals <- c(0.001,0.01,0.05,0.1)
-if ( sum(opt$pvalue %in% pvals)!=1 ) {
+if ( sum(opt$pvalue %in% exp.index$pvals)!=1 ) {
   perror("Invalid pvalue ",opt$pvalue)
   q(status=1)
 }
+
+# convert genes to bitmap
+genes.b <- gene.list2bit(genes,exp.index$genes)
+pinfo("genes.b:",sum(genes.b))
 pinfo("ready to go!")
 
 if ( opt$server ) {
   server.mode()
 }
 ####################################################################
-
-final.table <- run.GSA(names(expgenes),FUN=compute.stats,genes=genes,pval=opt$pvalue,fdr=opt$fdr,verbose=opt$verbose)
+final.table <- run.GSA(names(exp.index$expgenes),FUN=compute.stats.bit,genes=genes.b,pval=opt$pvalue,fdr=opt$fdr,verbose=opt$verbose)
 
 # nothing found
 if (is.null(final.table) ) {
   q(status=3)
 }
-
 # write to a file
 write.table(final.table,file=paste(opt$out.file,".tsv",sep=""),sep="\t",quote=F,row.names=F)
 
 q(status=0)
-
-# not implemented
-# make a plot
-if ( nrow(final.table) > 1 ) {
-  png(file=paste(opt$out.file,".png",sep="")width=550,height=550,res=150)
-  dev.off()      
-} else {
-  pwarning("Insufficient experiments to make a plot")
-}
-q(status=0)
-
-
-
-
-
-
-
 
